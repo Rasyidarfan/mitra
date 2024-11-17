@@ -27,7 +27,8 @@ Route::get('/dashboard', [DashboardController::class, 'index'])
 // Grouping Route dengan Middleware Auth
 Route::middleware('auth')->group(function () {
 
-    // Routing dari Breeze untuk Profil Pengguna
+    // Routing dari Breeze untuk Profil Pengguna// routes/web.php
+    Route::get('/profile', [ProfileController::class, 'index'])->name('profile');
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
@@ -37,11 +38,14 @@ Route::middleware('auth')->group(function () {
 
     // Route Survei
     Route::get('/survei', [SurveyController::class, 'index'])->name('survei');
+    Route::get('/survei/kalender', [SurveyController::class, 'kalender'])->name('surveikalender');
     Route::get('/survei/add', [SurveyController::class, 'add'])->name('addsurvei');
+    Route::get('/survei/add/{id}', [SurveyController::class, 'add'])->name('copysurvei');
     Route::post('/survei/add', [SurveyController::class, 'store'])->name('survei.store');
     Route::get('/survei/{id}', [SurveyController::class, 'show'])->name('surveidetail');
     Route::get('/survei/penilaian', [PenilaianController::class, 'index'])->name('penilaian');
     Route::get('/survei/{id}/edit', [SurveyController::class, 'edit'])->name('editsurvei');
+    Route::get('/survei/{id}/mitra', [SurveyController::class, 'mitra'])->name('survei.mitra');
     Route::put('/survei/{id}', [SurveyController::class, 'update'])->name('editsurvei.update');
 
     // Route Mitra

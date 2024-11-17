@@ -12,20 +12,35 @@ class Mitra extends Model
     protected $table = 'mitras';
 
     protected $fillable = [
-        'user_id',
         'name',
-        'pendidikan',
+        'email',
         'jenis_kelamin',
         'umur',
     ];
 
-    public function transaction()
+    public function surveys()
     {
-        return $this->hasMany(Transaction::class, 'mitra_id', 'id');
+        return $this->belongsToMany(Survey::class, 'survey_mitra')
+            ->withPivot('user_id', 'posisi')
+            ->withTimestamps();
     }
-    
-    public function user()
+
+    public function getJumlahSurveiAttribute()
     {
-        return $this->belongsTo(User::class, 'user_id');
+        return $this->surveys()->count();
+    }
+
+    public function getSurveiAktifAttribute()
+    {
+        return $this->surveys()->where('start_date', '<=', now())->where('end_date', '>=', now())->count();
+    }
+
+    public function getPenanggungJawab(Survey $survey)
+    {
+        return $this->surveys()
+            ->where('survey_id', $survey->id)
+            ->first()
+            ->pivot
+            ->user;
     }
 }

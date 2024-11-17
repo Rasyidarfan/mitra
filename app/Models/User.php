@@ -19,7 +19,6 @@ class User extends Authenticatable
     protected $fillable = [
         'email',
         'password',
-        'role_id',
     ];
 
     /**
@@ -45,18 +44,38 @@ class User extends Authenticatable
         ];
     }
 
-    public function role()
+    public function roles()
     {
-        return $this->belongsTo(Role::class, 'role_id');
-    }
-    
-    public function mitra()
-    {
-        return $this->hasOne(Mitra::class, 'user_id', 'id');
+        return $this->belongsToMany(Role::class, 'user_roles');
     }
 
-    public function employee()
+    public function hasRole($role)
     {
-        return $this->hasOne(Employee::class, 'user_id', 'id');
+        return $this->roles()->where('role', $role)->exists();
     }
+
+    public function hasAnyRole($roles)
+    {
+        return $this->roles()->whereIn('role', (array) $roles)->exists();
+    }
+
+    public function surveyMitras()
+    {
+        return $this->hasMany(SurveyMitra::class, 'user_id');
+    }
+
+    public function mitrasDiawasi()
+    {
+        return Mitra::whereHas('surveys', function($query) {
+            $query->whereHas('mitras', function($q) {
+                $q->where('user_id', $this->id);
+            });
+        })->get();
+    }
+
+    public function getRoleNamesAttribute()
+    {
+        return $this->roles->pluck('role')->implode(', ');
+    }
+
 }

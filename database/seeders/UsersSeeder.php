@@ -10,30 +10,42 @@ class UsersSeeder extends Seeder
     public function run()
     {
         DB::table('users')->insert([
-            ['id' => 1, 
-            'email' => 'user1@example.com', 
-            'password' => bcrypt('password1'),
-            'role_id' => 2],
-
-            ['id' => 2, 
-            'email' => 'user2@example.com', 
-            'password' => bcrypt('password2'),
-            'role_id' => 3],
-
-            ['id' => 3, 
-            'email' => 'user3@example.com', 
-            'password' => bcrypt('password3'),
-            'role_id' => 4],
-            
-            ['id' => 4, 
-            'email' => 'user4@example.com', 
-            'password' => bcrypt('password4'),
-            'role_id' => 4],
-
-            ['id' => 5, 
-            'email' => 'admin@example.com', 
-            'password' => bcrypt('admin'),
-            'role_id' => 1],
+            [
+                'id' => 1,
+                'email' => 'test1@mail.com',
+                'name' => 'nama 1',
+                'nip_9' => '123456789',
+                'nip_18' => '2024111720241112345',
+                'password' => bcrypt('patrickstar')
+            ],[
+                'id' => 2,
+                'email' => 'test2@mail.com',
+                'name' => 'nama 2',
+                'nip_9' => '123456789',
+                'nip_18' => '2024111720241112345',
+                'password' => bcrypt('patrickstar')
+            ],[
+                'id' => 3,
+                'email' => 'test3@mail.com',
+                'name' => 'nama 3',
+                'nip_9' => '123456789',
+                'nip_18' => '2024111720241112345',
+                'password' => bcrypt('patrickstar')
+            ],[
+                'id' => 4,
+                'email' => 'test4@mail.com',
+                'name' => 'nama 4',
+                'nip_9' => '123456789',
+                'nip_18' => '2024111720241112345',
+                'password' => bcrypt('patrickstar')
+            ],[
+                'id' => 5,
+                'email' => 'aarfanarsyad@gmail.com',
+                'name' => 'Ahmad Arfan Arsyad',
+                'nip_9' => '123456789',
+                'nip_18' => '2024111720241112345',
+                'password' => bcrypt('patrickstar')
+            ],
         ]);
     }
 }

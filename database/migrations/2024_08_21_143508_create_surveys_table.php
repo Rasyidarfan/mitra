@@ -16,16 +16,14 @@ class CreateSurveysTable extends Migration
     Schema::create('surveys', function (Blueprint $table) {
         $table->id('id');
         $table->string('name', 50);
-        $table->string('code', 50);
-        $table->unsignedBigInteger('payment_type_id');
+        $table->string('alias', 50);
         $table->date('start_date');
         $table->date('end_date');
-        $table->integer('payment');
+        $table->integer('mitra');
         $table->unsignedBigInteger('team_id');
         $table->timestamps();
 
-        $table->foreign('payment_type_id')->references('id')->on('payment_types')->onDelete('cascade');
-        $table->foreign('team_id')->references('id')->on('teams')->onDelete('cascade');
+        $table->foreign('team_id')->references('id')->on('roles')->onDelete('cascade');
     });
 }
 

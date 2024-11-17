@@ -31,6 +31,7 @@
                             <th scope="col" class="px-6 py-3">Nama</th>
                             <th scope="col" class="px-6 py-3">NIP</th>
                             <th scope="col" class="px-6 py-3">Email</th>
+                            <th scope="col" class="px-6 py-3">role</th>
                             <th scope="col" class="px-6 py-3">Aksi</th>
                         </tr>
                     </thead>
@@ -39,8 +40,15 @@
                         <tr class="bg-white dark:bg-gray-800 border-b dark:border-gray-700">
                             <td class="px-6 py-4">{{ $index + 1 }}</td>
                             <td class="px-6 py-4">{{ $employee['name'] }}</td>
-                            <td class="px-6 py-4">{{ $employee['nip'] }}</td>
+                            <td class="px-6 py-4">{{ $employee['nip_9'] }}- {{ $employee['nip_18'] }}</td>
                             <td class="px-6 py-4">{{ $employee['email'] }}</td>
+                            <td class="px-6 py-4">
+                                @foreach($employee->roles as $role)
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                        {{ $role->role }}
+                                    </span>
+                                @endforeach
+                            </td>
                             <td class="px-6 py-4">
                                 <div class="flex space-x-2">
                                     <button onclick="window.location='{{ route('pegawaidetail', ['id' => $index + 1]) }}'" class="px-3 py-1 text-white bg-blue-600 rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-blue-700 dark:hover:bg-blue-800">Lihat</button>

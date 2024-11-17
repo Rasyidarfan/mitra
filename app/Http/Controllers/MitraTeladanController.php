@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
-class MitraTeladan extends Controller{ 
+class MitraTeladanController extends Controller{ 
 
     protected $user;
     protected $mitra;
@@ -66,7 +66,7 @@ class MitraTeladan extends Controller{
 
     public function index()
     {
-        return view('mitrateladan', [
+        return view('mitra.teladan', [
             'user' => $this->user,
             'mitras' => $this->mitras
         ]); // Mengirim data ke view// Mengirim data ke view
@@ -82,7 +82,7 @@ class MitraTeladan extends Controller{
             return redirect()->route('mitra')->withErrors('Mitra tidak ditemukan.');
         }
 
-        return view('mitradetail', [
+        return view('mitra.detail', [
             'user' => $this->user,
             'mitra' => $mitra
         ]);

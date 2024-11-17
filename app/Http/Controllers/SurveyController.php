@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Survey;
+use App\Models\User;
+use App\Models\Role;
 use Carbon\Carbon;
 
 
@@ -15,70 +17,51 @@ class SurveyController extends Controller
 
     public function __construct()
     {
-        $this->user = Auth::user(); // Mendapatkan data pengguna yang login
-
-        // Data dummy untuk detail survei
-        // $this->surveys = [
-        //     [
-        //         'name' => 'Survei Dummy',
-        //         'kode' => '123',
-        //         'ketua_tim' => 'Anna Dewanta',
-        //         'tanggal_mulai' => '2024-01-01',
-        //         'tanggal_berakhir' => '2024-01-31',
-        //     ],
-        //     [
-        //         'name' => 'Survei Dummy 2',
-        //         'kode' => '456',
-        //         'ketua_tim' => 'Budi Santoso',
-        //         'tanggal_mulai' => '2024-02-01',
-        //         'tanggal_berakhir' => '2024-02-28',
-        //     ]
-        // ];
+        $this->user = User::findOrFail(Auth::id());
     }
-
-    // public function index()
-    // {
-    //     return view('survey', [
-    //         'user' => $this->user,
-    //         'surveys' => $this->surveys
-    //     ]); // Mengirim data ke view
-    // }
 
     public function index()
     {
         // Mengambil semua data survei dari tabel
-        $surveys = Survey::all();
-        
-        // Mengirim data survei ke view
-        return view('survey', [
+        $surveys = Survey::orderByRaw('ABS(DATEDIFF(NOW(), start_date)) DESC')->get();
+        $data = [
             'user' => $this->user,
-            'surveys' => $surveys]);
+            'surveys' => $surveys
+        ];
+
+        return view('survey.index', $data);
     }
 
-    public function add()
+    public function kalender()
     {
-        return view('addsurvey', ['user' => $this->user]); // Mengirim data ke view
+        // Mengambil semua data survei dari tabel
+        $surveys = Survey::orderByRaw('ABS(DATEDIFF(NOW(), start_date)) DESC')->get();
+
+        // Mengirim data survei ke view
+        return view('survey.kalender', [
+            'user' => $this->user,
+            'surveys' => $surveys
+        ]);
     }
 
-    // public function show($id)
-    // {
-    //     $survey = $this->surveys[$id - 1] ?? null;
+    public function add($id = null)
+    {
+        $data = [
+            'user' => $this->user,
+            'rolePenyelenggara' => ($this->user->hasRole('Admin')) ? Role::all() : $this->user->roles,
+            'survey' => ($id) ? Survey::findOrFail($id) : null
+        ];
+        return view('survey.add', $data);
+    }
 
-    //     return view('surveydetail', [
-    //         'user' => $this->user,
-    //         'survey' => $survey
-    //     ]);
-    // }
 
     public function show($id)
     {
-        $survey = Survey::find($id);
-        if (!$survey) {
-            return redirect()->route('survei')->with('error', 'Survei tidak ditemukan');
-        }
-        return view('surveydetail', [
+        $survey = Survey::findOrFail($id);
+        return view('survey.detail', [
             'user' => $this->user,
-            'survey' => $survey
+            'survey' => $survey,
+            'mitras' => $survey->getMitrasDetail()
         ]);
     }
 
@@ -87,9 +70,11 @@ class SurveyController extends Controller
         $survey = Survey::findOrFail($id);
         $survey->tanggal_mulai = Carbon::parse($survey->tanggal_mulai);
         $survey->tanggal_berakhir = Carbon::parse($survey->tanggal_berakhir);
+        $rolePenyelenggara = ( $this->user->hasRole('Admin')) ? Role::all() : $this->user->roles ;
 
-        return view('editsurvey', [
+        return view('survey.edit', [
             'user' => $this->user,
+            'RolePenyelenggara' => $rolePenyelenggara,
             'survey' => $survey
         ]);
     }
@@ -117,5 +102,42 @@ class SurveyController extends Controller
         ]);
 
         return redirect()->route('survei')->with('success', 'Survei berhasil diperbarui.');
+    }
+
+    public function mitra($id)
+    {
+        $survey = Survey::findOrFail($id);
+    
+        return view('survey.mitra', [
+            'user'=> $this->user,
+            'survey' => $survey,
+            'mitras' => $survey->getMitrasDetail(),
+            'unregMitras' => $survey->getMitrasUnregistered(),
+        ]);
+    }
+
+    public function addMitra(Survey $survey, Request $request)
+    {
+        $validated = $request->validate([
+            'mitra_id' => 'required|exists:mitras,id',
+            'posisi' => 'required|in:Pencacah,Pengawas,Pengolah',
+        ]);
+
+        $survey->mitras()->attach($request->mitra_id, [
+            'user_id' => $this->user->id,
+            'posisi' => $request->posisi
+        ]);
+
+        return redirect()->back()->with('success', 'Mitra berhasil ditambahkan');
+    }
+
+    // Get mitra per survey dengan PJ
+    public function getMitras(Survey $survey)
+    {
+        $mitras = $survey->mitras()
+                        ->with('pivot.user')  // eager load PJ
+                        ->get();
+
+        return view('survey.mitras', compact('survey', 'mitras'));
     }
 }

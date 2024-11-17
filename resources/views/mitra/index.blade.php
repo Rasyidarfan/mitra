@@ -27,19 +27,21 @@
                     <thead class="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-200">
                         <tr>
                             <th scope="col" class="px-6 py-3">No</th>
-                            <th scope="col" class="px-6 py-3">Nama</th>
                             <th scope="col" class="px-6 py-3">ID Sobat</th>
                             <th scope="col" class="px-6 py-3">Email</th>
-                            <th scope="col" class="px-6 py-3">Aksi</th>
+                            <th scope="col" class="px-6 py-3">Nama Lengkap</th>
+                            <th scope="col" class="px-6 py-3 text-center">Kegiatan <br>Total/Aktif</th>
+                            <th scope="col" class="px-6 py-3 text-center">Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach($mitras as $index => $mitra)
                         <tr class="bg-white dark:bg-gray-800 border-b dark:border-gray-700">
                             <td class="px-6 py-4">{{ $index + 1 }}</td>
-                            <td class="px-6 py-4">{{ $mitra['name'] }}</td>
-                            <td class="px-6 py-4">{{ $mitra['id_sobat'] }}</td>
+                            <td class="px-6 py-4">{{ $mitra['id'] }}</td>
                             <td class="px-6 py-4">{{ $mitra['email'] }}</td>
+                            <td class="px-6 py-4">{{ $mitra['name'] }}</td>
+                            <td class="px-6 py-4 text-center">{{ $mitra->jumlah_survei }}/{{ $mitra->survei_aktif }}</td>
                             <td class="px-6 py-4">
                                 <div class="flex space-x-2">
                                     <button onclick="window.location='{{ route('mitradetail', ['id' => $index + 1]) }}'" class="px-3 py-1 text-white bg-blue-600 rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-blue-700 dark:hover:bg-blue-800">Lihat</button>
