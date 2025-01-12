@@ -37,16 +37,21 @@ Route::middleware('auth')->group(function () {
     Route::get('/bantuan', [DashboardController::class, 'bantuan'])->name('bantuan');
 
     // Route Survei
-    Route::get('/survei', [SurveyController::class, 'index'])->name('survei');
-    Route::get('/survei/kalender', [SurveyController::class, 'kalender'])->name('surveikalender');
-    Route::get('/survei/add', [SurveyController::class, 'add'])->name('addsurvei');
-    Route::get('/survei/add/{id}', [SurveyController::class, 'add'])->name('copysurvei');
-    Route::post('/survei/add', [SurveyController::class, 'store'])->name('survei.store');
-    Route::get('/survei/{id}', [SurveyController::class, 'show'])->name('surveidetail');
-    Route::get('/survei/penilaian', [PenilaianController::class, 'index'])->name('penilaian');
-    Route::get('/survei/{id}/edit', [SurveyController::class, 'edit'])->name('editsurvei');
-    Route::get('/survei/{id}/mitra', [SurveyController::class, 'mitra'])->name('survei.mitra');
-    Route::put('/survei/{id}', [SurveyController::class, 'update'])->name('editsurvei.update');
+    Route::prefix('survei')->group(function() {
+        Route::get('/', [SurveyController::class, 'index'])->name('survei');
+        Route::get('/kalender', [SurveyController::class, 'kalender'])->name('surveikalender');
+        Route::get('/add', [SurveyController::class, 'add'])->name('addsurvei');
+        Route::get('/add/{id}', [SurveyController::class, 'add'])->name('copysurvei');
+        Route::post('/add', [SurveyController::class, 'store'])->name('survei.store');
+        Route::get('/{id}', [SurveyController::class, 'show'])->name('surveidetail');
+        Route::get('/penilaian', [PenilaianController::class, 'index'])->name('penilaian');
+        Route::get('/{id}/edit', [SurveyController::class, 'edit'])->name('editsurvei');
+        Route::get('/{id}/mitra', [SurveyController::class, 'mitra'])->name('survei.mitra');
+        Route::put('/{id}', [SurveyController::class, 'update'])->name('editsurvei.update');
+        Route::delete('/{id}', [SurveyController::class, 'destroy'])->name('survei.destroy');
+        Route::put('/{survey}/mitra', [SurveyController::class, 'addMitra'])->name('survei.mitra.store');
+        Route::put('/{survey}/mitra/batch', [SurveyController::class, 'addMitraBatch'])->name('survei.mitra.batch');
+     });
 
     // Route Mitra
     Route::get('/mitra', [MitraController::class, 'index'])->name('mitra');

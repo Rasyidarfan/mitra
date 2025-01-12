@@ -13,8 +13,8 @@ class SurveysSeeder extends Seeder
            [
                'name' => 'Pendataan survei hortikultura Januari',
                'alias' => 'horti',
-               'start_date' => '2024-01-04',
-               'end_date' => '2024-01-30',
+               'start_date' => '2025-01-04',
+               'end_date' => '2025-01-30',
                'mitra' => 5,
                'team_id' => 7, // Pastikan team_id 1 sudah ada di tabel teams
                'created_at' => now(),
@@ -23,8 +23,8 @@ class SurveysSeeder extends Seeder
            [
                'name' => 'Pendataan survei vimk24 tw1', 
                'alias' => 'vimk',
-               'start_date' => '2024-01-04',
-               'end_date' => '2024-01-15',
+               'start_date' => '2025-01-04',
+               'end_date' => '2025-01-15',
                'mitra' => 5,
                'team_id' => 8,
                'created_at' => now(),
@@ -33,8 +33,8 @@ class SurveysSeeder extends Seeder
            [
                'name' => 'Pendataan lapangan SHKK tw1',
                'alias' => 'SHKK',
-               'start_date' => '2024-01-13',
-               'end_date' => '2024-01-27', 
+               'start_date' => '2025-01-13',
+               'end_date' => '2025-01-27', 
                'mitra' => 6,
                'team_id' => 8,
                'created_at' => now(),
@@ -43,8 +43,8 @@ class SurveysSeeder extends Seeder
            [
                'name' => 'Pendataan susenas maret 2025',
                'alias' => 'Susenas',
-               'start_date' => '2024-02-07',
-               'end_date' => '2024-02-21',
+               'start_date' => '2025-02-07',
+               'end_date' => '2025-02-21',
                'mitra' => 36,
                'team_id' => 6,
                'created_at' => now(),
@@ -53,8 +53,8 @@ class SurveysSeeder extends Seeder
            [
                'name' => 'Pengolahan susenas maret 2025',
                'alias' => 'entri Susenas',
-               'start_date' => '2024-02-17',
-               'end_date' => '2024-03-16',
+               'start_date' => '2025-02-17',
+               'end_date' => '2025-03-16',
                'mitra' => 10,
                'team_id' => 11,
                'created_at' => now(),
@@ -63,8 +63,8 @@ class SurveysSeeder extends Seeder
            [
                'name' => 'Sakernas Februari',
                'alias' => 'Sakernas',
-               'start_date' => '2024-02-01',
-               'end_date' => '2024-02-14',
+               'start_date' => '2025-02-01',
+               'end_date' => '2025-02-14',
                'mitra' => 13,
                'team_id' => 6,
                'created_at' => now(),
@@ -73,8 +73,8 @@ class SurveysSeeder extends Seeder
            [
                'name' => 'Pendataan survei hortikultura Februari',
                'alias' => 'horti',
-               'start_date' => '2024-02-04', 
-               'end_date' => '2024-02-28',
+               'start_date' => '2025-02-04', 
+               'end_date' => '2025-02-28',
                'mitra' => 5,
                'team_id' => 7,
                'created_at' => now(),

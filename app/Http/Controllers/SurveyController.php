@@ -7,7 +7,6 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\Survey;
 use App\Models\User;
 use App\Models\Role;
-use Carbon\Carbon;
 
 
 class SurveyController extends Controller
@@ -20,27 +19,23 @@ class SurveyController extends Controller
         $this->user = User::findOrFail(Auth::id());
     }
 
-    public function index()
+    public function index(Request $request)
     {
-        // Mengambil semua data survei dari tabel
-        $surveys = Survey::orderByRaw('ABS(DATEDIFF(NOW(), start_date)) DESC')->get();
+        // dd($request);
         $data = [
             'user' => $this->user,
-            'surveys' => $surveys
+            'surveys' => Survey::getFilteredSurveys($request->search,$request->filter, 10)
         ];
-
+    
         return view('survey.index', $data);
     }
 
-    public function kalender()
+    public function kalender(Request $request)
     {
-        // Mengambil semua data survei dari tabel
-        $surveys = Survey::orderByRaw('ABS(DATEDIFF(NOW(), start_date)) DESC')->get();
-
         // Mengirim data survei ke view
         return view('survey.kalender', [
             'user' => $this->user,
-            'surveys' => $surveys
+            'surveys' => Survey::getFilteredSurveys($request->search,$request->filter, 10)
         ]);
     }
 
@@ -68,8 +63,6 @@ class SurveyController extends Controller
     public function edit($id)
     {
         $survey = Survey::findOrFail($id);
-        $survey->tanggal_mulai = Carbon::parse($survey->tanggal_mulai);
-        $survey->tanggal_berakhir = Carbon::parse($survey->tanggal_berakhir);
         $rolePenyelenggara = ( $this->user->hasRole('Admin')) ? Role::all() : $this->user->roles ;
 
         return view('survey.edit', [
@@ -81,27 +74,36 @@ class SurveyController extends Controller
 
     public function update(Request $request, $id)
     {
-        // Validasi data
-        $request->validate([
-            'name' => 'required|string|max:255',
-            'kode' => 'required|string|max:255',
-            'ketua_tim' => 'required|string|max:255',
-            'tanggal_mulai' => 'required|date',
-            'tanggal_berakhir' => 'required|date',
-        ]);
+        try {
+            $survey = Survey::findOrFail($id);
+            $userRoleIds = $this->user->roles->pluck('id')->toArray();
+    
+            // Validation
+            $request->validate([
+                'nama' => 'required|string|max:255',
+                'kode' => 'required|string|max:255',
+                'team_id' => ($this->user->hasRole('Admin')) ? 'required|integer|min:1' : 'required|in:'.implode(',', $userRoleIds),
+                'mitra' => 'required|integer|min:1',
+                'tanggal_mulai' => 'required|date',
+                'tanggal_berakhir' => 'required|date|after:tanggal_mulai',
+            ]);
 
-        $survey = Survey::findOrFail($id);
-
-        // Memperbarui data survei
-        $survey->update([
-            'name' => $request->input('name'),
-            'kode' => $request->input('kode'),
-            'ketua_tim' => $request->input('ketua_tim'),
-            'tanggal_mulai' => $request->input('tanggal_mulai'),
-            'tanggal_berakhir' => $request->input('tanggal_berakhir'),
-        ]);
-
-        return redirect()->route('survei')->with('success', 'Survei berhasil diperbarui.');
+    
+            // Update
+            $survey->update([
+                'name' => $request->input('nama'),
+                'alias' => $request->input('kode'),
+                'team_id' => $request->input('team_id'),
+                'mitra' => $request->input('mitra'),
+                'start_date' => $request->input('tanggal_mulai'),
+                'end_date' => $request->input('tanggal_berakhir'),
+            ]);
+    
+            return redirect()->route('survei')->with('success', 'Survei berhasil diperbarui.');
+    
+        } catch (\Exception $e) {
+            return back()->withInput()->with('error', 'Gagal memperbarui survei: ' . $e->getMessage());
+        }
     }
 
     public function mitra($id)
@@ -109,6 +111,7 @@ class SurveyController extends Controller
         $survey = Survey::findOrFail($id);
     
         return view('survey.mitra', [
+            'pj' => User::all(),
             'user'=> $this->user,
             'survey' => $survey,
             'mitras' => $survey->getMitrasDetail(),
@@ -116,19 +119,100 @@ class SurveyController extends Controller
         ]);
     }
 
-    public function addMitra(Survey $survey, Request $request)
+    public function store(Request $request)
     {
+        // Validasi input
         $validated = $request->validate([
-            'mitra_id' => 'required|exists:mitras,id',
-            'posisi' => 'required|in:Pencacah,Pengawas,Pengolah',
+            'nama' => 'required|string|max:50|unique:surveys,name',
+            'kode' => 'required|string|max:50',
+            'team_id' => 'required|exists:roles,id',
+            'mitra' => 'required|integer|min:1',
+            'tanggal_mulai' => 'required|date',
+            'tanggal_berakhir' => 'required|date|after:tanggal_mulai'
+        ], [
+            'nama.required' => 'Nama survei harus diisi',
+            'nama.unique' => 'Nama survei sudah ada',
+            'kode.required' => 'Alias survei harus diisi',
+            'team_id.required' => 'Tim harus dipilih',
+            'mitra.required' => 'Jumlah mitra harus diisi',
+            'mitra.min' => 'Jumlah mitra minimal 1',
+            'tanggal_mulai.required' => 'Tanggal mulai harus diisi',
+            'tanggal_berakhir.required' => 'Tanggal selesai harus diisi',
+            'tanggal_berakhir.after' => 'Tanggal selesai harus setelah tanggal mulai'
         ]);
 
-        $survey->mitras()->attach($request->mitra_id, [
-            'user_id' => $this->user->id,
-            'posisi' => $request->posisi
-        ]);
+        try {
+            // Create survey
+            Survey::create([
+                'name' => $validated['nama'],
+                'alias' => $validated['kode'],
+                'team_id' => $validated['team_id'],
+                'mitra' => $validated['mitra'],
+                'start_date' => $validated['tanggal_mulai'],
+                'end_date' => $validated['tanggal_berakhir']
+            ]);
 
-        return redirect()->back()->with('success', 'Mitra berhasil ditambahkan');
+            return redirect()->route('survei')->with('success', 'Survei berhasil ditambahkan');
+
+        } catch (\Exception $e) {
+            return back()->withInput()->with('error', 'Gagal menambahkan survei: ' . $e->getMessage());
+        }
+    }
+
+    public function destroy($id)
+    {
+        try {
+            $survey = Survey::findOrFail($id);
+            $survey->delete();
+
+            return redirect()->route('survei')->with('success', 'Survei berhasil dihapus');
+        } catch (\Exception $e) {
+            return back()->with('error', 'Gagal menghapus survei: ' . $e->getMessage());
+        }
+    }
+
+    public function addMitra(Request $request, Survey $survey)
+    {
+        try {
+            $validated = $request->validate([
+                'mitra_id' => 'required|exists:mitras,id',
+                'posisi' => 'required|in:Pencacah,Pengawas,Pengolah'
+            ]);
+    
+            $survey->mitras()->attach($validated['mitra_id'], [
+                'posisi' => $validated['posisi'],
+                'pj_id' => $this->user->id
+            ]);
+    
+            return redirect()->back()->with('success', 'Mitra berhasil didaftarkan');
+    
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Gagal mendaftarkan mitra: ' . $e->getMessage());
+        }
+    }
+
+    public function addMitraBatch(Request $request, Survey $survey)
+    {
+        try {
+            $validated = $request->validate([
+                'mitra_ids' => 'required|array',
+                'mitra_ids.*' => 'exists:mitras,id',
+                'posisi' => 'required|in:Pencacah,Pengawas,Pengolah'
+            ]);
+    
+            // Attach semua mitra dengan posisi yang sama
+            foreach($validated['mitra_ids'] as $mitraId) {
+                $survey->mitras()->attach($mitraId, [
+                    'posisi' => $validated['posisi'],
+                    'pj_id' => $this->user->id
+                ]);
+            }
+    
+            return redirect()->back()->with('success', count($validated['mitra_ids']) . ' mitra berhasil didaftarkan');
+    
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Gagal mendaftarkan mitra: ' . $e->getMessage());
+        }
     }
 
     // Get mitra per survey dengan PJ

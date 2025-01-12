@@ -20,11 +20,11 @@
 
         <div class="grid md:grid-cols-12 gap-4 mb-4">
             <div class="col-span-12 md:col-span-7">
-                <label for="team_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Tim Penyelenggara</label>
+                <label for="team_id" class="block text-sm font-medium text-gray-700 dark:text-gray-300">Tim Penyelenggara </label>
                 <select name="team_id" id="team_id" class="mt-1 block w-full p-2 border border-gray-300 rounded-lg shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200" required>
                     @foreach ($rolePenyelenggara as $role)
                     @if ($role->role !== 'Admin' && $role->role !== 'Kepala' && $role->role !== 'Mitra')
-                        <option value="{{ $role->id }}" {{ $survey->team_id  ?? 0 == $role->id ? 'selected' : '' }}>{{ $role->role }}</option>
+                        <option value="{{ $role->id }}" @selected(old('team_id', $survey->team_id ?? 0) == $role->id)>{{ $role->role }}</option>
                     @endif
                     @endforeach
                 </select>
@@ -53,7 +53,7 @@
                 Back
             </button>
 
-            <button type="submit" class="px-4 py-2 text-white bg-orange-500 border border-transparent rounded-lg shadow-sm hover:bg-orange-600 focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 dark:bg-orange-600 dark:hover:bg-orange-700">
+            <button type="submit" class="px-4 py-2 text-white bg-green-500 border border-transparent rounded-lg shadow-sm hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 dark:bg-green-600 dark:hover:bg-green-700">
                 Simpan
             </button>
         </div>
